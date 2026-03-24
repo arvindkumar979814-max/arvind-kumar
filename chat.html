@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Builder</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            min-height: 100vh;
+        }
+
+        .builder-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+
+        .preview-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #4a5568;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+        
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .section h3 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .ai-suggestions {
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .ai-suggestions:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(240, 147, 251, 0.4);
+        }
+
+        .experience-item, .education-item, .skill-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .remove-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            float: right;
+            font-size: 12px;
+        }
+
+        .resume-preview {
+            background: white;
+            min-height: 80vh;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            font-family: 'Georgia', serif;
+        }
+
+        .resume-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .resume-name {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+        }
+
+        .resume-title {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .resume-contact {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 1.1em;
+        }
+
+        .resume-content {
+            padding: 40px 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .resume-section {
+            margin-bottom: 30px;
+        }
+
+        .resume-section h3 {
+            color: #667eea;
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 5px;
+        }
+
+        .resume-item {
+            margin-bottom: 20px;
+        }
+
+        .resume-item h4 {
+            color: #4a5568;
+            margin-bottom: 5px;
+        }
+
+        .resume-item .date {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .skills-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .skill-tag {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+            
+            .resume-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+        }
+
+        .download-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .resume-preview {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Builder Panel -->
+        <div class="builder-panel">
+            <div class="header">
+                <h1><i class="fas fa-magic"></i> AI Resume Builder <p> By Created in Arvind Kumar</p></h1>
+                <p>Create professional resumes in minutes</p>
+            </div>
+
+            <div class="ai-suggestions" onclick="generateAIResume()">
+                <i class="fas fa-brain"></i> Generate AI Resume Template
+            </div>
+
+            <!-- Personal Info -->
+            <div class="section">
+                <h3><i class="fas fa-user"></i> Personal Information</h3>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="name" placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label>Job Title</label>
+                    <input type="text" id="title" placeholder="Software Developer">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" placeholder="john@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" id="phone" placeholder="+1 (555) 123-4567">
+                </div>
+                <div class="form-group">
+                    <label>LinkedIn / Portfolio</label>
+                    <input type="url" id="linkedin" placeholder="https://linkedin.com/in/johndoe">
+                </div>
+            </div>
+
+            <!-- Experience -->
+            <div class="section">
+                <h3><i class="fas fa-briefcase"></i> Work Experience</h3>
+                <div id="experienceList"></div>
+                <button class="btn btn-secondary" onclick="addExperience()">
+                    <i class="fas fa-plus"></i> Add Experience
+                </button>
+            </div>
+
+            <!-- Education -->
+            <div class="section">
+                <h3><i class="fas fa-graduation-cap"></i> Education</h3>
+                <div id="educationList"></div>
+                <button class="btn btn-secondary" onclick="addEducation()">
+                    <i class="fas fa-plus"></i> Add Education
+                </button>
+            </div>
+
+            <!-- Skills -->
+            <div class="section">
+                <h3><i class="fas fa-tools"></i> Skills</h3>
+                <div class="form-group">
+                    <label>Skills (comma separated)</label>
+                    <input type="text" id="skillsInput" placeholder="JavaScript, React, Node.js, Python">
+                </div>
+                <div id="skillsList" class="skills-list"></div>
+                <button class="btn btn-secondary" onclick="addSkill()">
+                    <i class="fas fa-plus"></i> Add Skills
+                </button>
+            </div>
+
+            <button class="btn" onclick="updatePreview()">
+                <i class="fas fa-eye"></i> Update Preview
+            </button>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="preview-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2><i class="fas fa-eye"></i> Live Preview</h2>
+                <div class="download-section">
+                    <button class="btn" onclick="downloadResume()">
+                        <i class="fas fa-download"></i> Download PDF
+                    </button>
+                </div>
+            </div>
+            <div class="resume-preview" id="resumePreview">
+                <div style="padding: 40px; text-align: center; color: #666;">
+                    <i class="fas fa-file-alt" style="font-size: 4em; color: #ccc; margin-bottom: 20px;"></i>
+                    <h2>Build your resume to see preview</h2>
+                    <p>Fill in the form on the left to generate your professional resume</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let experienceCount = 0;
+        let educationCount = 0;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updatePreview();
+        });
+
+        // Add Experience
+        function addExperience() {
+            experienceCount++;
+            const experienceHtml = `
+                <div class="experience-item" id="exp-${experienceCount}">
+                    <button class="remove-btn" onclick="removeExperience(${experienceCount})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <div class="form-group">
+                        <label>Job Title</label>
+                        <input type="text" id="exp-title-${experienceCount}" placeholder="Software Engineer">
+                    </div>
+                    <div class="form-group">
+                        <label>Company</label>
+                        <input type="text" id="exp-company-${experienceCount}" placeholder="Tech Corp">
+                    </div>
+                    <div class="form-group">
+                        <label>Dates (e.g., Jan 2020 - Present)</label>
+                        <input type="text" id="exp-dates-${experienceCount}" placeholder="Jan 2020 - Present">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="exp-desc-${experienceCount}" rows="3" placeholder="Describe your responsibilities and achievements..."></textarea>
+                    </div>
+                </div>
+            `;
+            document.getElementById('experienceList').insertAdjacentHTML('beforeend', experienceHtml);
+        }
+
+        // Add Education
+        function addEducation() {
+            educationCount++;
+            const educationHtml = `
+                <div class="education-item" id="edu-${educationCount}">
+                    <button class="remove-btn" onclick="removeEducation(${educationCount})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <div class="form-group">
+                        <label>Degree</label>
+                        <input type="text" id="edu-degree-${educationCount}" placeholder="Bachelor of Science">
+                    </div>
+                    <div class="form-group">
+                        <label>School</label>
+                        <input type="text" id="edu-school-${educationCount}" placeholder="University of Example">
+                    </div>
+                    <div class="form-group">
+                        <label>Dates</label>
+                        <input type="text" id="edu-dates-${educationCount}" placeholder="2016 - 2020">
+                    </div>
+                </div>
+            `;
+            document.getElementById('educationList').insertAdjacentHTML('beforeend', educationHtml);
+        }
+
+        // Remove functions
+        function removeExperience(id) {
+            document.getElementById(`exp-${id}`).remove();
+        }
+
+        function removeEducation(id) {
+            document.getElementById(`edu-${id}`).remove();
+        }
+
+        // Add Skills
+        function addSkill() {
+            const skillsInput = document.getElementById('skillsInput');
+            const skills = skillsInput.value.split(',').map(skill => skill.trim()).filter(skill => skill);
+            
+            skills.forEach(skill => {
+                const skillHtml = `<span class="skill-tag">${skill}</span>`;
+                document.getElementById('skillsList').insertAdjacentHTML('beforeend', skillHtml);
+            });
+            
+            skillsInput.value = '';
+            updatePreview();
+        }
+
+        // AI Resume Generator
+        function generateAIResume() {
+            // Simulate AI generation with sample data
+            const aiTemplates = [
+                {
+                    name: "John Smith",
+                    title: "Senior Software Engineer",
+                    email: "john.smith@email.com",
+                    phone: "+1 (555) 123-4567",
+                    linkedin: "linkedin.com/in/johnsmith",
+                    skills: "JavaScript, React, Node.js, Python, AWS, Docker"
+                },
+                {
+                    name: "Sarah Johnson",
+                    title: "UX/UI Designer",
+                    email: "sarah.j@email.com",
+                    phone: "+1 (555) 987-6543",
+                    linkedin: "linkedin.com/in/sarahdesign",
+                    skills: "Figma, Adobe XD, Sketch, User Research, Prototyping"
+                }
+            ];
+
+            const randomTemplate = aiTemplates[Math.floor(Math.random() * aiTemplates.length)];
+            
+            document.getElementById('name').value = randomTemplate.name;
+            document.getElementById('title').value = randomTemplate.title;
+            document.getElementById('email').value = randomTemplate.email;
+            document.getElementById('phone').value = randomTemplate.phone;
+            document.getElementById('linkedin').value = randomTemplate.linkedin;
+            document.getElementById('skillsInput').value = randomTemplate.skills;
+
+            // Clear and add one experience
+            document.getElementById('experienceList').innerHTML = '';
+            experienceCount = 0;
+            addExperience();
+            setTimeout(() => {
+                document.getElementById(`exp-title-1`).value = "Software Engineer";
+                document.getElementById(`exp-company-1`).value = "TechCorp Inc.";
+                document.getElementById(`exp-dates-1`).value = "Jan 2021 - Present";
+                document.getElementById(`exp-desc-1`).value = "• Developed scalable web applications using React and Node.js\n• Led a team of 5 developers in agile environment\n• Improved application performance by 40%";
+            }, 100);
+
+            updatePreview();
+        }
+
+        // Update Preview
+        function updatePreview() {
+            const name = document.getElementById('name').value || 'Your Name';
+            const title = document.getElementById('title').value || 'Professional';
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const linkedin = document.getElementById('linkedin').value;
+            const skillsList = document.getElementById('skillsList').innerHTML;
+
+            let experienceHtml = '';
+            for (let i = 1; i <= experienceCount; i++) {
+                const title = document.getElementById(`exp-title-${i}`)?.value || '';
+                const company = document.getElementById(`exp-company-${i}`)?.value || '';
+                const dates = document.getElementById(`exp-dates-${i}`)?.value || '';
+                const desc = document.getElementById(`exp-desc-${i}`)?.value || '';
+                
+                if (title || company) {
+                    experienceHtml += `
+                        <div class="resume-item">
+                            <h4>${title} at ${company}</h4>
+                                                       <div class="date">${dates}</div>
+                            <p>${desc.replace(/\n/g, '<br>')}</p>
+                        </div>
+                    `;
+                }
+            }
+
+            let educationHtml = '';
+            for (let i = 1; i <= educationCount; i++) {
+                const degree = document.getElementById(`edu-degree-${i}`)?.value || '';
+                const school = document.getElementById(`edu-school-${i}`)?.value || '';
+                const dates = document.getElementById(`edu-dates-${i}`)?.value || '';
+                
+                if (degree || school) {
+                    educationHtml += `
+                        <div class="resume-item">
+                            <h4>${degree}</h4>
+                            <p><strong>${school}</strong> • ${dates}</p>
+                        </div>
+                    `;
+                }
+            }
+
+            const previewHtml = `
+                <div class="resume-header">
+                    <div class="resume-name">${name}</div>
+                    <div class="resume-title">${title}</div>
+                    <div class="resume-contact">
+                        ${email ? `<span><i class="fas fa-envelope"></i> ${email}</span>` : ''}
+                        ${phone ? `<span><i class="fas fa-phone"></i> ${phone}</span>` : ''}
+                        ${linkedin ? `<span><i class="fab fa-linkedin"></i> ${linkedin}</span>` : ''}
+                    </div>
+                </div>
+                <div class="resume-content">
+                    <div>
+                        <div class="resume-section">
+                            <h3><i class="fas fa-briefcase"></i> Professional Experience</h3>
+                            ${experienceHtml || '<p style="color: #999; font-style: italic;">No experience added yet</p>'}
+                        </div>
+                        <div class="resume-section">
+                            <h3><i class="fas fa-graduation-cap"></i> Education</h3>
+                            ${educationHtml || '<p style="color: #999; font-style: italic;">No education added yet</p>'}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="resume-section">
+                            <h3><i class="fas fa-tools"></i> Skills</h3>
+                            <div class="skills-list">${skillsList || '<p style="color: #999; font-style: italic;">No skills added yet</p>'}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('resumePreview').innerHTML = previewHtml;
+        }
+
+        // Download Resume as PDF (using html2canvas and jsPDF)
+        function downloadResume() {
+            // Load required libraries dynamically
+            if (typeof html2canvas === 'undefined' || typeof jsPDF === 'undefined') {
+                alert('Generating PDF... Please wait a moment.');
+                
+                // Create a simple text version for now
+                const resumeContent = document.getElementById('resumePreview').innerText;
+                const blob = new Blob([resumeContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'resume.txt';
+                a.click();
+                URL.revokeObjectURL(url);
+                return;
+            }
+
+            html2canvas(document.getElementById('resumePreview'), {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210;
+                const pageHeight = 295;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+
+                let position = 0;
+
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                pdf.save('my-resume.pdf');
+            });
+        }
+
+        // Real-time updates
+        document.addEventListener('input', function(e) {
+            if (e.target.matches('input, textarea')) {
+                updatePreview();
+            }
+        });
+
+        // Enter key for skills
+        document.getElementById('skillsInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addSkill();
+            }
+        });
+
+        // Auto-generate initial experience and education
+        setTimeout(() => {
+            addExperience();
+            addEducation();
+        }, 500);
+    </script>
+</body>
+</html>
